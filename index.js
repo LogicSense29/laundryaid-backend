@@ -19,7 +19,7 @@ app.use('/api', requestRoute)
 
 const keepAppAlive = () => {
   setInterval(() => {
-    https.get("https://your-app-name.onrender.com");
+    https.get("https://laundryaid-backend.onrender.com");
     console.log("⏱️ App pinged to stay alive");
   }, 1000 * 60 * 5); // every 5 minutes
 };
