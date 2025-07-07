@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { requestRoute } from './routes/request.js'
+import db from './model/db/db.js';
 import https from "https";
 const app = express()
 const PORT = process.env.PORT 
