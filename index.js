@@ -3,10 +3,17 @@ import cors from 'cors'
 import { requestRoute } from './routes/request.js'
 
 const app = express()
-const PORT = 8999
+const PORT = process.env.PORT 
 
 //middlewares
-app.use(cors())
+app.use(
+  cors({
+    origin: ["https://laundryaid.com.ng", "http://localhost:5174"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use('/api', requestRoute)
 
