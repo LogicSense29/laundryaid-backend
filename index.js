@@ -1,7 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import { requestRoute } from './routes/request.js'
-
+import https from "https";
 const app = express()
 const PORT = process.env.PORT 
 
@@ -17,6 +17,12 @@ app.use(
 app.use(express.json());
 app.use('/api', requestRoute)
 
+const keepAppAlive = () => {
+  setInterval(() => {
+    https.get("https://your-app-name.onrender.com");
+    console.log("⏱️ App pinged to stay alive");
+  }, 1000 * 60 * 5); // every 5 minutes
+};
 
 //Nuber of visits
 app.post("/api/track-visit", async (req, res) => {
@@ -24,7 +30,7 @@ app.post("/api/track-visit", async (req, res) => {
         res.sendStatus(200);
       });
             
-
+keepAppAlive();
 
 
 
