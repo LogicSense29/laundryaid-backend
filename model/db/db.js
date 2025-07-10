@@ -1,10 +1,10 @@
 import dotenv from "dotenv";
 dotenv.config(); // ✅ Load environment variables
 
-import { Client } from "pg";
+import { Pool } from "pg";
 
 // ✅ Create and connect the client
-const db = new Client({
+const db = new Pool ({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false,
@@ -13,6 +13,6 @@ const db = new Client({
   connectionTimeoutMillis: 10000, // wait 10s before failing
 });
 
-db.connect(); // ✅ You must connect the client!
+// db.connect(); // ✅ You must connect the client!
 
 export default db;
