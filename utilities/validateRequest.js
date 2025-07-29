@@ -12,11 +12,13 @@ export function validateRequestBody(body) {
     pickupOption,
     paymentRef,
     paidAmount,
-    clothes_count,
+    clothes_count = 80,
   } = body;
 
   const errors = [];
 
+  console.log(paidAmount)
+   console.log(serviceType);
   // Name
   // if (!validator.isEmpty(name)) {
   //   errors.push("Invalid Name");
@@ -35,6 +37,16 @@ export function validateRequestBody(body) {
   // Address
   if (!address || validator.isEmpty(address)) {
     errors.push("Address is required");
+  }
+
+  // Address
+  if (!paymentRef || validator.isEmpty(paymentRef)) {
+    errors.push("paymentRef is required");
+  }
+
+  // Address
+  if (!paidAmount) {
+    errors.push("Amount is required");
   }
 
   // Package

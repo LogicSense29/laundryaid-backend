@@ -2,13 +2,15 @@ import db from "../model/db/db.js";
 import { findOrCreateCustomer } from "../utilities/dbUtility.js";
 import { generateAdminEmail, requestEmail, sendRequestMail } from "../utilities/mailer.js";
 import { validateRequestBody } from "../utilities/validateRequest.js";
+import { verifyPayment } from "./paymentController.js";
 
 
 export const addRequest =  async (req, res ) => {
   const errors = validateRequestBody(req.body);
 
   if (errors.length > 0) {
-    return res.status(400).json({message: 'Error Validating Input', erorr:  errors });
+    console.log(errors)
+    return res.status(400).json({error: 'Error Validating Input' });
   }
 
 
@@ -26,7 +28,7 @@ export const addRequest =  async (req, res ) => {
     clothes_count,
   } = req.body;
 
-  console.log(req.body);
+  // console.log(req.body);
 
   const user_id = await findOrCreateCustomer(db, email, contact);
   
@@ -52,12 +54,19 @@ export const addRequest =  async (req, res ) => {
       ]
     );
 
+    const request_id = result.rows[0].request_id;
+    const packageType = result.rows[0].package;
+    const paymentVerification = await verifyPayment(paymentRef,packageType,request_id,user_id,paidAmount)
+
+    if(!paymentVerification.success) {
+      return res.status(400).json({error : 'Payment verification failed'})
+    }
+
     res.status(201).json({ request: result.rows[0] });
     const to = result.rows[0].email;
     const customerName = result.rows[0].name;
     const pickup_date = result.rows[0].pickup_date;
     const delivery_date = result.rows[0].delivery_date;
-    const packageType = result.rows[0].package;
     const clothesCount = result.rows[0].clothes_count;
     const deliveryAddress = result.rows[0].address;
     const mobile = result.rows[0].contact;

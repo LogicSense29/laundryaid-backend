@@ -4,7 +4,7 @@ import { limitPickupRequest } from '../middlewares/limitRequest.js'
 
 const route = express.Router()
 
-route.post('/add_request', limitPickupRequest, addRequest)
+route.post('/add_request', addRequest)
 
 
 export {route as requestRoute}

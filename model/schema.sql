@@ -29,8 +29,9 @@ CREATE TABLE requests (
 
 -- PACKAGES
 CREATE TABLE packages (
-  id SERIAL PRIMARY KEY,
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   name VARCHAR(50) NOT NULL, -- wash & fold, premium, deluxe
+  currency VARCHAR(10) DEFAULT 'NGN',
   price NUMERIC(10, 2) NOT NULL,
   description TEXT,
   clothes_limit INTEGER DEFAULT 80
@@ -87,7 +88,10 @@ CREATE TABLE payments (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES customers(user_id),
   request_id UUID REFERENCES request(request_id),
-  amount NUMERIC(10, 2),
+  package_id UUID REFERENCES packages(id),
+  -- currency VARCHAR(10) DEFAULT 'NGN',
+  -- amount NUMERIC(10, 2),
+  paystack_reference VARCHAR(100) UNIQUE NOT NULL,
   status VARCHAR(20), -- success, failed
   payment_date TIMESTAMP DEFAULT NOW()
 );
@@ -105,3 +109,50 @@ CREATE TABLE otp_verifications (
     otp_expires_at TIMESTAMP NOT NULL, -- Expiry time
     created_at TIMESTAMP DEFAULT NOW()
 );
+
+CREATE TABLE subscriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(user_id) ON DELETE CASCADE,
+  plan_id UUID NOT NULL REFERENCES plans(id) ON DELETE RESTRICT,
+
+  paystack_subscription_code VARCHAR(100), 
+  status VARCHAR(20) NOT NULL DEFAULT 'active',
+  start_date TIMESTAMP DEFAULT NOW(),
+  end_date TIMESTAMP,
+  cancel_at TIMESTAMP,
+  canceled_at TIMESTAMP,
+  trial_end TIMESTAMP,
+
+  is_recurring BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE payment (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(user_id) ON DELETE CASCADE,
+  subscription_id UUID REFERENCES subscriptions(id) ON DELETE SET NULL,
+  request_id UUID REFERENCES request(request_id) ON DELETE SET NULL,
+  
+  amount INTEGER NOT NULL,
+  currency VARCHAR(10) DEFAULT 'NGN',
+  paystack_reference VARCHAR(100) UNIQUE NOT NULL,
+  status VARCHAR(20) DEFAULT 'success', -- success, failed, pending
+  channel VARCHAR(50), -- card, bank, etc.
+  paid_at TIMESTAMP,
+
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+
+CREATE TABLE plans (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name VARCHAR(50) NOT NULL,
+  price INTEGER NOT NULL, -- in kobo
+  currency VARCHAR(10) DEFAULT 'NGN',
+  interval VARCHAR(20) NOT NULL, -- monthly, yearly
+  -- paystack_plan_code VARCHAR(100) UNIQUE NOT NULL, -- from Paystack
+  description TEXT,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
