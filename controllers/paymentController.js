@@ -1,6 +1,7 @@
-import axios from 'axios'
+import axios from 'axios';
+import db from '../model/db/db.js';
 
-export const verifyPayment = async (reference, plan, request_id, customer_id, amount) => {
+export const verifyPayment = async (res, reference, plan, request_id, customer_id, amount) => {
   try {
     const response = await axios(
       `https://api.paystack.co/transaction/verify/${reference}`,
@@ -14,7 +15,7 @@ export const verifyPayment = async (reference, plan, request_id, customer_id, am
     const data = response.data.data;
 
     //Check for Package
-    const { rows } = await db.query("SELECT id From packages WHERE name = $1", [
+    const { rows } = await db.query("SELECT id FROM packages WHERE name = $1", [
       plan,
     ]);
     if (rows.length == 0) {

@@ -56,7 +56,7 @@ export const addRequest =  async (req, res ) => {
 
     const request_id = result.rows[0].request_id;
     const packageType = result.rows[0].package;
-    const paymentVerification = await verifyPayment(paymentRef,packageType,request_id,user_id,paidAmount)
+    const paymentVerification = await verifyPayment(res,paymentRef,packageType,request_id,user_id,paidAmount)
 
     if(!paymentVerification.success) {
       return res.status(400).json({error : 'Payment verification failed'})
