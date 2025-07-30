@@ -7,7 +7,7 @@ export const verifyPayment = async (res, reference, plan, request_id, customer_i
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
         headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          Authorization: `Bearer ${process.env.PAYSTACK_TEST_KEY}`,
         },
       }
     );
@@ -38,8 +38,8 @@ export const verifyPayment = async (res, reference, plan, request_id, customer_i
 
     //Check that there is no duplicate Reference
     const { rows: ref } = await db.query(
-      "SELECT paystack_reference FROM payments WHERE paystack_reference = $1 and customer_id = $2",
-      [reference, user_id]
+      "SELECT paystack_reference FROM payments WHERE paystack_reference = $1 and user_id = $2",
+      [reference, customer_id]
     );
 
     if (ref.length > 0) {
@@ -51,10 +51,10 @@ export const verifyPayment = async (res, reference, plan, request_id, customer_i
     // Store payment record
     await db.query(
       `
-            INSERT INTO payments (user_id, request_id, package_id, amount, paystack_reference, status)
+            INSERT INTO payments (user_id, request_id, package_id, paystack_reference, status)
             VALUES ($1, $2, $3, $4, $5)
           `,
-      [customer_id, request_id, package_id, amount, reference, 'success']
+      [customer_id, request_id, package_id, reference, 'success']
     );
 
     return {
@@ -65,7 +65,7 @@ export const verifyPayment = async (res, reference, plan, request_id, customer_i
     console.log("Error occured while verifying Payment", err);
     return {
       success: false,
-      message: "Payment successfully",
+      message: "Payment unsuccesful",
       error: err
     };
 }

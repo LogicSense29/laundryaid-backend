@@ -17,8 +17,6 @@ export function validateRequestBody(body) {
 
   const errors = [];
 
-  console.log(paidAmount)
-   console.log(serviceType);
   // Name
   // if (!validator.isEmpty(name)) {
   //   errors.push("Invalid Name");
