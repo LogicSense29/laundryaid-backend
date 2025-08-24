@@ -2,6 +2,7 @@ import db from "../model/db/db.js";
 import { findOrCreateCustomer } from "../utilities/dbUtility.js";
 import { generateAdminEmail, requestEmail, sendRequestMail } from "../utilities/mailer.js";
 import { validateRequestBody } from "../utilities/validateRequest.js";
+import { promoCode } from "../utilities/promoCode.js";
 import { verifyPayment } from "./paymentController.js";
 
 
@@ -26,6 +27,7 @@ export const addRequest =  async (req, res ) => {
     paymentRef,
     paidAmount,
     clothes_count,
+    promo_code
   } = req.body;
 
   // console.log(req.body);
@@ -54,15 +56,34 @@ export const addRequest =  async (req, res ) => {
       ]
     );
 
-    const request_id = result.rows[0].request_id;
-    const packageType = result.rows[0].package;
-    const paymentVerification = await verifyPayment(res,paymentRef,packageType,request_id,user_id,paidAmount)
+    //Voucher check
+    if (promo_code) {
+      const promoResult = await promoCode(user_id, paidAmount, promo_code);
 
-    if(!paymentVerification.success) {
-      return res.status(400).json({error : 'Payment verification failed'})
+      console.log(promoResult)
+      console.log(promo_code);
+      if(!promoResult.success){
+         return res.status(400).json({ error: promoResult.message });
+      }
     }
 
-    res.status(201).json({ request: result.rows[0] });
+    const request_id = result.rows[0].request_id;
+    const packageType = result.rows[0].package;
+    const paymentVerification = await verifyPayment(
+      res,
+      paymentRef,
+      packageType,
+      request_id,
+      user_id,
+      paidAmount,
+      promo_code
+    );
+
+
+    if (!paymentVerification.success) {
+      return res.status(400).json({ error: "Payment verification failed" });
+    }
+
     const to = result.rows[0].email;
     const customerName = result.rows[0].name;
     const pickup_date = result.rows[0].pickup_date;
@@ -74,23 +95,24 @@ export const addRequest =  async (req, res ) => {
     const option = result.rows[0].pickup_option;
     // const clothes_count = result.rows[0].clothes_count
 
+    res.status(201).json({ request: result.rows[0] });
     await sendRequestMail({
       to,
       subject: "Your Laundry Request 😊",
-      bcc: 'palmslaundryng@gmail.com',
+      bcc: "palmslaundryng@gmail.com",
       html: requestEmail({
         to,
         customerName,
-       pickupDate:  pickup_date,
-       deliveryDate:  delivery_date,
+        pickupDate: pickup_date,
+        deliveryDate: delivery_date,
         packageType,
         deliveryAddress,
         clothesCount,
       }),
-    })
+    });
 
     await sendRequestMail({
-      to: 'palmslaundryng@gmail.com',
+      to: "palmslaundryng@gmail.com",
       subject: "New Pickup Request 😊",
       html: generateAdminEmail({
         email: customerEmail,
@@ -104,7 +126,6 @@ export const addRequest =  async (req, res ) => {
         pickupOption: option,
       }),
     });
-
   } catch (err) {
     console.error("DB Error:", err);
     res.status(500).json({ error: "Failed to create request" });

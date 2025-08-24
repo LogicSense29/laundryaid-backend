@@ -1,13 +1,13 @@
 import axios from 'axios';
 import db from '../model/db/db.js';
 
-export const verifyPayment = async (res, reference, plan, request_id, customer_id, amount) => {
+export const verifyPayment = async (res, reference, plan, request_id, customer_id, amount, promo_code) => {
   try {
     const response = await axios(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
         headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          Authorization: `Bearer ${process.env.PAYSTACK_TEST_KEY}`,
         },
       }
     );
@@ -47,6 +47,7 @@ export const verifyPayment = async (res, reference, plan, request_id, customer_i
         error: "No vex guy, na Duplicate Reference",
       });
     }
+
 
     // Store payment record
     await db.query(

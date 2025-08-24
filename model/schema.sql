@@ -37,6 +37,32 @@ CREATE TABLE packages (
   clothes_limit INTEGER DEFAULT 80
 );
 
+CREATE TABLE promo_codes (
+  id SERIAL PRIMARY KEY,
+  code VARCHAR(50) UNIQUE NOT NULL,              -- e.g. 'SUMMER25'
+  description TEXT,                              -- Optional description
+  type VARCHAR(20) NOT NULL,                     -- 'percentage' or 'fixed'
+  value DECIMAL(10, 2) NOT NULL,                 -- e.g., 25.00 for 25% or $25
+  min_order_amount DECIMAL(10, 2),               -- Optional: minimum cart/package value
+  usage_limit INTEGER,                           -- Optional: total times this code can be used
+  used_count INTEGER DEFAULT 0,                  -- Track how many times it's been used
+  start_date TIMESTAMP,                          -- Optional: when promo starts
+  end_date TIMESTAMP,                            -- Optional: when promo ends
+  is_active BOOLEAN DEFAULT TRUE,                -- Toggle promo availability
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE user_promo_usages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id INTEGER NOT NULL,
+  promo_code_id UUID NOT NULL,
+  used_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, promo_code_id), -- one use per user
+  FOREIGN KEY (promo_code_id) REFERENCES promo_codes(id)
+);
+
+
 -- SUBSCRIPTIONS
 CREATE TABLE subscriptions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

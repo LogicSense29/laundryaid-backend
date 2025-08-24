@@ -13,9 +13,12 @@ export function validateRequestBody(body) {
     paymentRef,
     paidAmount,
     clothes_count = 80,
+    promo_code
   } = body;
 
   const errors = [];
+  // console.log(clothes_count)
+  // console.log(serviceType)
 
   // Name
   // if (!validator.isEmpty(name)) {
@@ -81,6 +84,11 @@ export function validateRequestBody(body) {
   ) {
     errors.push("clothes_count must be a positive integer");
   }
+
+if (promo_code?.trim() && promo_code !== "LAUNDRY_RESCUE") {
+  errors.push("Invalid Voucher");
+}
+
 
   return errors;
 }
