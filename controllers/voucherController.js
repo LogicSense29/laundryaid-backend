@@ -3,8 +3,10 @@ import db from "../model/db/db.js"
 export const promoCodeCheck = async (req,res) => {
     const {promo_code, email} = req.body
 
+     const toUpperCase = promo_code?.toUpperCase();
+
         try{
-            const {rows} = await db.query('SELECT * FROM promo_codes WHERE code = $1', [promo_code])
+            const {rows} = await db.query('SELECT * FROM promo_codes WHERE code = $1', [toUpperCase])
             if(rows.length == 0){
                 return res.status(400).json({error: 'Invalid code'})
             }

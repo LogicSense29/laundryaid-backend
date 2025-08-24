@@ -85,7 +85,9 @@ export function validateRequestBody(body) {
     errors.push("clothes_count must be a positive integer");
   }
 
-if (promo_code?.trim() && promo_code !== "LAUNDRY_RESCUE") {
+  const toUpperCase = promo_code?.toUpperCase()
+
+if (toUpperCase?.trim() && toUpperCase !== "LAUNDRY_RESCUE") {
   errors.push("Invalid Voucher");
 }
 

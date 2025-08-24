@@ -56,9 +56,12 @@ export const addRequest =  async (req, res ) => {
       ]
     );
 
+
+
     //Voucher check
     if (promo_code) {
-      const promoResult = await promoCode(user_id, paidAmount, promo_code);
+      const toUpperCase = promo_code.toUpperCase()
+      const promoResult = await promoCode(user_id, paidAmount, toUpperCase);
 
       console.log(promoResult)
       console.log(promo_code);

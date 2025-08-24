@@ -1,13 +1,13 @@
 import axios from 'axios';
 import db from '../model/db/db.js';
 
-export const verifyPayment = async (res, reference, plan, request_id, customer_id, amount, promo_code) => {
+export const verifyPayment = async (res, reference, plan, request_id, customer_id) => {
   try {
     const response = await axios(
       `https://api.paystack.co/transaction/verify/${reference}`,
       {
         headers: {
-          Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
+          Authorization: `Bearer ${process.env.PAYSTACK_TEST_KEY}`,
         },
       }
     );
