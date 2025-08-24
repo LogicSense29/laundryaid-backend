@@ -35,8 +35,8 @@ export const promoCodeCheck = async (req,res) => {
 
 
             const value = rows[0].value
-            const percentage = value / 100
-            return res.status(200).json({ message: "Correct code", percentage: percentage });
+            // const percentage = value / 100
+            return res.status(200).json({ message: "Correct code", percentage: value });
         }catch(error) {
              console.error("DB Error from Voucher Check:", error);
              res.status(500).json({ error: "Failed to check Voucher code" });
