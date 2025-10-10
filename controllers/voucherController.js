@@ -42,3 +42,12 @@ export const promoCodeCheck = async (req,res) => {
              res.status(500).json({ error: "Failed to check Voucher code" });
         }
 }
+
+//Name
+// John Toluwani
+//Email
+// JOHNTOLUWANI2018@gmail.COM
+//Address
+// No 1 Adepoju cresent D'rovans MKO Abiola Way ringroad
+//phone Number
+// 09098880886

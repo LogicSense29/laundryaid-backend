@@ -9,7 +9,11 @@ const PORT = process.env.PORT
 //middlewares
 app.use(
   cors({
-    origin: ["https://laundryaid.com.ng", "http://localhost:5174"],
+    origin: [
+      "https://laundryaid.com.ng",
+      "http://localhost:5174",
+      "http://192.168.44.14:5174",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,

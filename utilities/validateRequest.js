@@ -85,12 +85,15 @@ export function validateRequestBody(body) {
     errors.push("clothes_count must be a positive integer");
   }
 
-  const toUpperCase = promo_code?.toUpperCase()
+//   const toUpperCase = promo_code?.toUpperCase()
 
-if (toUpperCase?.trim() && toUpperCase?.trim() !== "FREEDOMPROMO") {
-  errors.push("Invalid Voucher");
-}
+// if (toUpperCase?.trim() && toUpperCase?.trim() !== "FREEDOMPROMO") {
+//   errors.push("Invalid Voucher");
+// }
 
 
   return errors;
 }
+
+
+//From the validaton request, we check for the code to see if it exists.

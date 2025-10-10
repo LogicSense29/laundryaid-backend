@@ -39,7 +39,7 @@ export const promoCode = async (user_id, amount, promo_code) => {
       return { success: false, message: "Promo code is not active" };
     }
 
-    if (promo.start_date && date < new Date(promo.start_date)) {
+    if (promo?.start_date && date < new Date(promo?.start_date)) {
       await client.query("ROLLBACK");
       return { success: false, message: "Promo has not started yet" };
     }
