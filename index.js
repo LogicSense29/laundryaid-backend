@@ -11,6 +11,7 @@ app.use(
   cors({
     origin: [
       "https://laundryaid.com.ng",
+      "https://www.laundryaid.com.ng",
       "http://localhost:5174",
       "http://192.168.44.14:5174",
     ],
