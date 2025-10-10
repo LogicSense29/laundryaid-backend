@@ -13,7 +13,7 @@ export const verifyPayment = async (res, reference, plan, request_id, customer_i
     );
 
     const data = response.data.data;
-
+console.log('checking',plan)
     //Check for Package
     const { rows } = await db.query("SELECT id FROM packages WHERE name = $1", [
       plan,
