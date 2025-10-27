@@ -126,7 +126,7 @@ export const addRequest =  async (req, res ) => {
     });
 
     await sendRequestMail({
-      to: "deyanju.john@yahoo.com",
+      to: "palmslaundryng@gmail.com",
       subject: "New Pickup Request 😊",
       bcc: "info@laundryaid.com.ng",
       html: generateAdminEmail({
