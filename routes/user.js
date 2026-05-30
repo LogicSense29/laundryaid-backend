@@ -1,5 +1,5 @@
 import express from "express";
-import { loginUser, requestOTP, verifyOTP, otpLogin } from "../controllers/userController.js";
+import { loginUser, requestOTP, otpLogin } from "../controllers/userController.js";
 
 const route = express.Router();
 

@@ -477,41 +477,6 @@ export const otpLogin = async (req, res) => {
 };
 
 
-  const { email, otp } = req.body;
-  if (!email || !otp) return res.status(400).json({ error: "email and otp required" });
-
-  try {
-const q = await db.query(
-  `SELECT id FROM email_otps 
-     WHERE email=$1 AND verified=true AND used=false 
-     ORDER BY created_at DESC LIMIT 1`,
-  [email]
-);
-
-const row = q.rows[0];
-if (!row) return res.status(400).json({ error: "OTP not verified" });
-
-const passwordHash = await bcrypt.hash(password, 10);
-
-await db.query(
-  `INSERT INTO customers (email, password_hash, is_active)
-     VALUES ($1, $2, true)
-     ON CONFLICT (email) DO UPDATE SET password_hash=$2, is_active=true`,
-  [email, passwordHash]
-);
-
-// mark otp as used
-await db.query(`UPDATE email_otps SET used=true WHERE id=$1`, [row.id]);
-
-res.json({ ok: true, message: "Password created. You can now log in." });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: "internal error" });
-  }
-
-}
-
-
 export const authRefresh = async (req, res) => {
   const token = req.cookies?.rt;
   if (!token) return res.status(401).json({ error: "Missing refresh token" });
