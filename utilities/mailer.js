@@ -86,7 +86,81 @@ export const generateAdminEmail = ({
   </div>
 `;
 
+export const generateOtpEmail = (otp, fullname) => {
 
+  const name = fullname.trim().split(" ")[0];
+
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+      <img src="cid:laundryaidlogo" alt="LaundryAid Logo" style="width: 150px;" />
+      <h2 style="text-align: center; color: #333;">Your Verification Code</h2>
+      <p>Hello <strong>Valued Customer</strong>,</p>
+      <p>Use the OTP below to complete your verification:</p>
+      
+      <div style="text-align: center; margin: 30px 0;">
+        <span style="padding: 15px 25px; font-size: 24px; letter-spacing: 5px; background: #f4f4f4; border-radius: 6px; border: 1px solid #ddd;">
+          <strong>${otp}</strong>
+        </span>
+      </div>
+
+      <p>This OTP expires in <strong>20 minutes</strong>. Do not share it with anyone.</p>
+      <p>Thanks,<br/>KLaundryAid</p>
+
+      <hr style="margin-top: 30px;"/>
+      <p style="font-size: 12px; color: #777; text-align: center;">If you didn't request this code, you can safely ignore this email.</p>
+    </div>
+  `;
+};
+
+
+
+
+export const generateSubscriptionReminderEmail = ({ name, daysLeft, planName }) => `
+  <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+    <img src="cid:laundryaidlogo" alt="LaundryAid Logo" style="width: 150px;" />
+    <h2 style="color: #127733;">Subscription Reminder 🧺</h2>
+    <p>Hi <strong>${name}</strong>,</p>
+    <p>Your <strong>${planName}</strong> subscription expires in <strong>${daysLeft} day(s)</strong>.</p>
+    <p>Renew now to keep enjoying fresh, clean laundry without interruption!</p>
+    <a href="https://laundryaid.com.ng/dashboard" style="display:inline-block;margin-top:16px;padding:12px 24px;background:#127733;color:#fff;border-radius:6px;text-decoration:none;">Renew Now</a>
+    <p style="margin-top:24px;">Warm regards,<br/><strong>The LaundryAid Team</strong></p>
+  </div>
+`;
+
+export const generateDailyDigestEmail = ({ date, transactions }) => {
+  const rows = transactions.map(t => `
+    <tr>
+      <td style="padding:8px;border-bottom:1px solid #eee;">${t.name}</td>
+      <td style="padding:8px;border-bottom:1px solid #eee;">${t.email}</td>
+      <td style="padding:8px;border-bottom:1px solid #eee;">${t.package}</td>
+      <td style="padding:8px;border-bottom:1px solid #eee;">₦${Number(t.amount).toLocaleString()}</td>
+      <td style="padding:8px;border-bottom:1px solid #eee;">${t.status}</td>
+    </tr>
+  `).join("");
+
+  const total = transactions.reduce((sum, t) => sum + Number(t.amount || 0), 0);
+
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 700px; margin: auto; padding: 20px;">
+      <img src="cid:laundryaidlogo" alt="LaundryAid Logo" style="width: 150px;" />
+      <h2 style="color: #127733;">Daily Transaction Report — ${date}</h2>
+      <p>Total transactions: <strong>${transactions.length}</strong> | Total revenue: <strong>₦${total.toLocaleString()}</strong></p>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <thead>
+          <tr style="background:#127733;color:#fff;">
+            <th style="padding:8px;text-align:left;">Name</th>
+            <th style="padding:8px;text-align:left;">Email</th>
+            <th style="padding:8px;text-align:left;">Package</th>
+            <th style="padding:8px;text-align:left;">Amount</th>
+            <th style="padding:8px;text-align:left;">Status</th>
+          </tr>
+        </thead>
+        <tbody>${rows || '<tr><td colspan="5" style="padding:8px;text-align:center;">No transactions today</td></tr>'}</tbody>
+      </table>
+      <p style="margin-top:20px;color:#777;font-size:12px;">Generated automatically by LaundryAid</p>
+    </div>
+  `;
+};
 
 const transporter = nodemailer.createTransport({
   host: "mail.laundryaid.com.ng",

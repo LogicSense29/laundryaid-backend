@@ -4,6 +4,7 @@ import { generateAdminEmail, requestEmail, sendRequestMail } from "../utilities/
 import { validateRequestBody } from "../utilities/validateRequest.js";
 import { promoCode } from "../utilities/promoCode.js";
 import { verifyPayment } from "./paymentController.js";
+import { creditReferralCommission } from "./referralController.js";
 
 
 export const addRequest =  async (req, res ) => {
@@ -27,12 +28,11 @@ export const addRequest =  async (req, res ) => {
     paymentRef,
     paidAmount,
     clothes_count = 80,
-    promo_code
+    promo_code,
+    referred_by,
   } = req.body;
 
-  // console.log(req.body);
-
-  const user_id = await findOrCreateCustomer(db, email, contact);
+  const user_id = await findOrCreateCustomer(db, email, contact, referred_by);
   
 
   try {
@@ -97,6 +97,9 @@ export const addRequest =  async (req, res ) => {
     if (!paymentVerification.success) {
       return res.status(400).json({ error: "Payment verification failed" });
     }
+
+    // Credit referral commission (15%) to referrer if applicable
+    await creditReferralCommission(user_id, paidAmount);
 
     const to = result.rows[0].email;
     const customerName = result.rows[0].name;

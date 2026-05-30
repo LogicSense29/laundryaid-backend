@@ -17,6 +17,16 @@ CREATE TABLE user (
   created_at TIMESTAMP DEFAULT NOW()
 );
 
+-- otps (for email verification)
+CREATE TABLE email_otps (
+  id SERIAL PRIMARY KEY,
+  email TEXT NOT NULL,
+  otp TEXT NOT NULL,              -- in prod: store a hash of the OTP
+  expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+  used BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
 
 CREATE TABLE requests (
    request_id PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -30,7 +40,7 @@ CREATE TABLE requests (
 -- PACKAGES
 CREATE TABLE packages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  name VARCHAR(50) NOT NULL, -- wash & fold, premium, deluxe
+  name VARCHAR(50) NOT NULL, -- wash & fold, premium, deluxe, ironing, basic
   currency VARCHAR(10) DEFAULT 'NGN',
   price NUMERIC(10, 2) NOT NULL,
   description TEXT,

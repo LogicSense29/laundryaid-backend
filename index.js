@@ -3,6 +3,11 @@ import cors from 'cors'
 import { requestRoute } from './routes/request.js'
 import db from './model/db/db.js';
 import https from "https";
+import cookieParser from 'cookie-parser'
+import { authRoute } from './routes/user.js';
+import { userProfileRoute } from './routes/userProfile.js';
+import { startSchedulers } from './utilities/scheduler.js';
+
 const app = express()
 const PORT = process.env.PORT 
 
@@ -21,7 +26,10 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 app.use('/api', requestRoute)
+app.use('/auth', authRoute)
+app.use('/api/user', userProfileRoute)
 
 const keepAppAlive = () => {
   setInterval(() => {
@@ -30,15 +38,14 @@ const keepAppAlive = () => {
   }, 1000 * 60 * 5); // every 5 minutes
 };
 
-//Nuber of visits
+//Number of visits
 app.post("/api/track-visit", async (req, res) => {
         await db.query("INSERT INTO visits DEFAULT VALUES");
         res.sendStatus(200);
       });
             
 keepAppAlive();
-
-
+startSchedulers();
 
 app.listen(PORT, ()=> {
         console.log('APP LISTENING ON PORT:', PORT)
