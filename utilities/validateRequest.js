@@ -51,7 +51,7 @@ export function validateRequestBody(body) {
   }
 
   // Package
-  const allowedPackages = ["wash & fold", "premium", "deluxe"];
+  const allowedPackages = ["wash & fold", "premium", "deluxe", "basic", "ironing"];
   if (!allowedPackages.includes(serviceType)) {
     errors.push(`Invalid package. Allowed: ${allowedPackages.join(", ")}`);
   }
