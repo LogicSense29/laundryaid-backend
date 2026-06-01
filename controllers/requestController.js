@@ -85,7 +85,6 @@ export const addRequest =  async (req, res ) => {
     const request_id = result.rows[0].request_id;
     const packageType = result.rows[0].package;
     const paymentVerification = await verifyPayment(
-      res,
       paymentRef,
       packageType,
       request_id,

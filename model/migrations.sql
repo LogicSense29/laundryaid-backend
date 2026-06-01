@@ -52,3 +52,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
 CREATE INDEX IF NOT EXISTS idx_customers_referred_by ON customers(referred_by);
 CREATE INDEX IF NOT EXISTS idx_customers_referrer_id ON customers(referrer_id);
 CREATE INDEX IF NOT EXISTS idx_request_user_id ON request(user_id);
+-- Update package check constraint to include new package types
+ALTER TABLE request DROP CONSTRAINT request_package_check;
+ALTER TABLE request ADD CONSTRAINT request_package_check 
+  CHECK (package IN ('basic', 'ironing', 'premium', 'wash & fold', 'deluxe'));

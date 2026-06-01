@@ -1,7 +1,7 @@
 import axios from 'axios';
 import db from '../model/db/db.js';
 
-export const verifyPayment = async (res, reference, plan, request_id, customer_id) => {
+export const verifyPayment = async (reference, plan, request_id, customer_id) => {
   try {
     const response = await axios(
       `https://api.paystack.co/transaction/verify/${reference}`,
@@ -14,12 +14,16 @@ export const verifyPayment = async (res, reference, plan, request_id, customer_i
 
     const data = response.data.data;
 console.log('checking',plan)
+console.log('checking', data)
     //Check for Package
     const { rows } = await db.query("SELECT id FROM packages WHERE name = $1", [
       plan,
     ]);
+
+
+    console.log('from database', rows)
     if (rows.length == 0) {
-      return res.status(400).json({ error: "Invalid package" });
+      return { success: false, message: "Invalid package" };
     }
 
     const package_id = rows[0].id;
@@ -33,7 +37,7 @@ console.log('checking',plan)
           `,
         [customer_id, request_id, package_id, reference , 'failed']
       );
-      return res.status(400).json({ error: "Transaction Failed" });
+      return { success: false, message: "Transaction Failed", error: data };
     }
 
     //Check that there is no duplicate Reference
@@ -43,9 +47,7 @@ console.log('checking',plan)
     );
 
     if (ref.length > 0) {
-      return res.status(401).json({
-        error: "No vex guy, na Duplicate Reference",
-      });
+      return { success: false, message: "No vex guy, na Duplicate Reference" };
     }
 
 
