@@ -154,7 +154,7 @@ export const addRequest =  async (req, res ) => {
     await sendRequestMail({
       to: "palmslaundryng@gmail.com",
       subject: "New Pickup Request",
-      bcc: "lappiconnect@gmail.com",
+      bcc: "palmslaundryng@gmail.com",
       html: generateAdminEmail({
         email: customerEmail,
         customerName,

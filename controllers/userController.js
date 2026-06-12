@@ -215,8 +215,8 @@ export const registerUser = async (req, res) => {
     const hashed = await bcrypt.hash(password, salt);
 
     const { rows } = await db.query(
-      "INSERT INTO customers(email, password, name, ip_address) VALUES($1,$2,$3,$4) RETURNING *",
-      [email, hashed, name, ip]
+      "INSERT INTO customers(email, password, ip_address) VALUES($1,$2,$3) RETURNING *",
+      [email, hashed, ip]
     );
 
     if (!rows) {
