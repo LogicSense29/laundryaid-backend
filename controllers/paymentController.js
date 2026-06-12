@@ -13,8 +13,6 @@ export const verifyPayment = async (reference, plan, request_id, customer_id) =>
     );
 
     const data = response.data.data;
-console.log('checking',plan)
-console.log('checking', data)
     //Check for Package
     const { rows } = await db.query("SELECT id FROM packages WHERE name = $1", [
       plan,
@@ -59,6 +57,35 @@ console.log('checking', data)
           `,
       [customer_id, request_id, package_id, reference, 'success']
     );
+
+    // [NEW] Subscription Enrollment
+    // Check if the chosen plan exists in the 'plans' table and is a monthly plan
+    const { rows: planRows } = await db.query(
+      "SELECT id, interval FROM plans WHERE name = $1",
+      [plan]
+    );
+
+    if (planRows.length > 0 && planRows[0].interval === 'monthly') {
+      // Automatically enroll the user into a 30-day recurring subscription
+      await db.query(
+        `INSERT INTO subscriptions (customer_id, plan_id, status, start_date, end_date, is_recurring)
+         VALUES ($1, $2, 'active', CURRENT_DATE, CURRENT_DATE + INTERVAL '30 days', true)`,
+        [customer_id, planRows[0].id]
+      );
+
+      // Insert Subscription Notification
+      await db.query(
+        `INSERT INTO notifications (user_id, title, message, type)
+         VALUES ($1, $2, $3, $4)`,
+        [
+          customer_id,
+          "Subscription Activated ⭐",
+          `You've successfully subscribed to the ${plan} monthly plan! Valid for 30 days.`,
+          "subscription"
+        ]
+      );
+      console.log(`Successfully enrolled customer ${customer_id} in monthly plan: ${plan}`);
+    }
 
     return {
       success: true,

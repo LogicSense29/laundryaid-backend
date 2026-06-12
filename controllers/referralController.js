@@ -1,4 +1,5 @@
 import db from "../model/db/db.js";
+import { sendWhatsApp } from "../utilities/whatsapp.js";
 
 const REFERRAL_COMMISSION_RATE = 0.15; // 15%
 
@@ -20,7 +21,7 @@ export const creditReferralCommission = async (userId, paidAmount) => {
 
     // Find the referrer
     const { rows: referrer } = await db.query(
-      "SELECT user_id FROM customers WHERE referrer_id = $1",
+      "SELECT user_id, mobile FROM customers WHERE referrer_id = $1",
       [referredByCode]
     );
 
@@ -29,11 +30,44 @@ export const creditReferralCommission = async (userId, paidAmount) => {
     const referrerId = referrer[0].user_id;
     const commission = Math.floor(paidAmount * REFERRAL_COMMISSION_RATE);
 
-    // Credit referrer wallet
+    // ✅ Check: has referrer booked at least once in the last 30 days?
+    const { rows: recentBookings } = await db.query(
+      `SELECT 1 FROM request 
+       WHERE user_id = $1 
+         AND created_at >= NOW() - INTERVAL '30 days'
+       LIMIT 1`,
+      [referrerId]
+    );
+
+    if (!recentBookings.length) {
+      // Referrer is inactive — skip commission and send a nudge notification
+      await db.query(
+        `INSERT INTO notifications (user_id, title, message, type)
+         VALUES ($1, $2, $3, $4)`,
+        [
+          referrerId,
+          "You missed a commission! 💸",
+          `One of your referrals just completed a laundry order, but you haven't booked in the last 30 days. Book an order this month to keep earning your 15% commission.`,
+          "referral_nudge"
+        ]
+      );
+      
+      // Send WhatsApp Nudge
+      if (referrer[0].mobile) {
+        const mobile = referrer[0].mobile;
+        const to = `whatsapp:${mobile.startsWith("+") ? mobile : "+234" + mobile.replace(/^0/, "")}`;
+        const body = `*You missed a commission!* 💸\n\nOne of your referrals just completed a laundry order, but you haven't booked in the last 30 days.\n\nBook an order this month to keep earning your 15% commission. 🧺\nVisit laundryaid.com.ng`;
+        sendWhatsApp(to, body).catch(console.error);
+      }
+
+      console.log(`⚠️ Commission skipped for ${referrerId} — inactive in last 30 days. Nudge sent via App & WhatsApp.`);
+      return;
+    }
+
+    // Referrer is active — credit commission
     await db.query(
       `INSERT INTO referral_earnings (referrer_id, referred_user_id, amount, status)
-       VALUES ($1, $2, $3, 'pending')
-       ON CONFLICT DO NOTHING`,
+       VALUES ($1, $2, $3, 'pending')`,
       [referrerId, userId, commission]
     );
 
@@ -50,6 +84,7 @@ export const creditReferralCommission = async (userId, paidAmount) => {
     console.error("❌ Referral commission error:", err.message);
   }
 };
+
 
 /**
  * GET /api/user/referrals - Get referral stats for logged-in user

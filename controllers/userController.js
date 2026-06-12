@@ -105,7 +105,7 @@ export const getMe = async (req, res) => {
     const userId = req.user_id;
 
     const result = await db.query(
-      "SELECT id, email, name FROM customers WHERE id = $1",
+      "SELECT user_id, email, mobile, referrer_id FROM customers WHERE user_id = $1",
       [userId]
     );
 
@@ -393,8 +393,8 @@ const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000));
   if (!email) return res.status(400).json({ error: "email required" });
 
           const { rows: checkUserExist } = await db.query(
-            "SELECT name FROM customers WHERE email =$1",
-            [email]
+            "SELECT email FROM customers WHERE email =$1",
+            [email.toLowerCase()]
           );
 
           if (checkUserExist.length == 0)
@@ -413,7 +413,7 @@ const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000));
     await sendRequestMail(
       {
             to: email,
-            subject: "OTP Verification 😊",
+            subject: "OTP Verification",
             bcc: "info@laundryaid.com.ng",
             html: generateOtpEmail({
               otp,

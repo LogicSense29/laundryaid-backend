@@ -6,6 +6,7 @@ import https from "https";
 import cookieParser from 'cookie-parser'
 import { authRoute } from './routes/user.js';
 import { userProfileRoute } from './routes/userProfile.js';
+import { adminRoute } from './routes/admin.js';
 import { startSchedulers } from './utilities/scheduler.js';
 
 const app = express()
@@ -30,6 +31,7 @@ app.use(cookieParser());
 app.use('/api', requestRoute)
 app.use('/auth', authRoute)
 app.use('/api/user', userProfileRoute)
+app.use('/api/admin', adminRoute)
 
 const keepAppAlive = () => {
   setInterval(() => {

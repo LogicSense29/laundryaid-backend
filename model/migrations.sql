@@ -19,8 +19,7 @@ CREATE TABLE IF NOT EXISTS referral_earnings (
   referred_user_id UUID NOT NULL REFERENCES customers(user_id) ON DELETE CASCADE,
   amount NUMERIC(10, 2) NOT NULL,
   status VARCHAR(20) DEFAULT 'pending', -- pending, paid
-  created_at TIMESTAMP DEFAULT NOW(),
-  UNIQUE(referrer_id, referred_user_id)
+  created_at TIMESTAMP DEFAULT NOW()
 );
 
 -- 4. Plans table (for subscriptions)
@@ -56,3 +55,26 @@ CREATE INDEX IF NOT EXISTS idx_request_user_id ON request(user_id);
 ALTER TABLE request DROP CONSTRAINT request_package_check;
 ALTER TABLE request ADD CONSTRAINT request_package_check 
   CHECK (package IN ('basic', 'ironing', 'premium', 'wash & fold', 'deluxe'));
+
+-- 7. Notifications table
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES customers(user_id) ON DELETE CASCADE,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  type VARCHAR(50) DEFAULT 'system',
+  is_read BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- 8. Withdrawals table (for referral earnings payouts)
+CREATE TABLE IF NOT EXISTS withdrawals (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES customers(user_id) ON DELETE CASCADE,
+  amount NUMERIC(12, 2) NOT NULL,
+  bank_name VARCHAR(100) NOT NULL,
+  account_name VARCHAR(100) NOT NULL,
+  account_number VARCHAR(50) NOT NULL,
+  status VARCHAR(20) DEFAULT 'pending', -- pending, completed, rejected
+  created_at TIMESTAMP DEFAULT NOW()
+);

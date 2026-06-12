@@ -70,31 +70,54 @@ export const generateAdminEmail = ({
   mobile,
   clothesCount,
   pickupOption,
-}) => `
-  <div style="font-family: Arial, sans-serif; padding: 20px;">
+  requestId,
+  statusToken,
+}) => {
+  const BASE_URL = process.env.BACKEND_URL || "http://localhost:8999";
+
+  const makeBtn = (label, status, color) =>
+    `<a href="${BASE_URL}/api/admin/bookings/${requestId}/update-status?status=${status}&token=${statusToken}"
+      style="display:inline-block;margin:4px;padding:12px 20px;background:${color};color:#fff;
+             text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;">
+       ${label}
+    </a>`;
+
+  return `
+  <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px;">
     <img src="cid:laundryaidlogo" alt="LaundryAid Logo" style="width: 150px;" />
-    <h2>New Laundry Request</h2>
-    <p><strong>Name:</strong> ${customerName}</p>
-    <p><strong>Email:</strong> ${email}</p>
-    <p><strong>Pickup:</strong> ${pickupDate}</p>
-    <p><strong>Delivery:</strong> ${deliveryDate}</p>
-    <p><strong>Package:</strong> ${packageType}</p>
-    <p><strong>Clothes:</strong> ${clothesCount}</p>
-    <p><strong>Pickup Option:</strong> ${pickupOption}</p>
-     <p><strong>Phone Number:</strong> ${mobile}</p>
-    <p><strong>Address:</strong> ${address}</p>
+    <h2 style="color:#127733;">New Laundry Request 🧺</h2>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+      <tr><td style="padding:6px 0;"><strong>Name:</strong></td><td>${customerName}</td></tr>
+      <tr><td style="padding:6px 0;"><strong>Email:</strong></td><td>${email}</td></tr>
+      <tr><td style="padding:6px 0;"><strong>Phone:</strong></td><td>${mobile}</td></tr>
+      <tr><td style="padding:6px 0;"><strong>Package:</strong></td><td>${packageType}</td></tr>
+      <tr><td style="padding:6px 0;"><strong>Clothes:</strong></td><td>${clothesCount}</td></tr>
+      <tr><td style="padding:6px 0;"><strong>Pickup Option:</strong></td><td>${pickupOption}</td></tr>
+      <tr><td style="padding:6px 0;"><strong>Pickup Date:</strong></td><td>${pickupDate}</td></tr>
+      <tr><td style="padding:6px 0;"><strong>Delivery Date:</strong></td><td>${deliveryDate}</td></tr>
+      <tr><td style="padding:6px 0;"><strong>Address:</strong></td><td>${address}</td></tr>
+    </table>
+
+    <hr style="border:none;border-top:1px solid #eee;margin:20px 0;"/>
+    <p style="font-weight:bold;margin-bottom:12px;">Update Order Status:</p>
+    <div>
+      ${makeBtn("⚙️ Processing", "processing", "#2563eb")}
+      ${makeBtn("✅ Ready", "ready", "#7c3aed")}
+      ${makeBtn("🚚 Delivered", "delivered", "#127733")}
+    </div>
+    <p style="margin-top:16px;font-size:12px;color:#999;">Clicking a button will immediately update the customer's order status.</p>
   </div>
 `;
+};
 
-export const generateOtpEmail = (otp, fullname) => {
-
+export const generateOtpEmail = ({ otp, fullname = "Customer" }) => {
   const name = fullname.trim().split(" ")[0];
 
   return `
     <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
       <img src="cid:laundryaidlogo" alt="LaundryAid Logo" style="width: 150px;" />
       <h2 style="text-align: center; color: #333;">Your Verification Code</h2>
-      <p>Hello <strong>Valued Customer</strong>,</p>
+      <p>Hello <strong>Valued ${name}</strong>,</p>
       <p>Use the OTP below to complete your verification:</p>
       
       <div style="text-align: center; margin: 30px 0;">
@@ -104,7 +127,7 @@ export const generateOtpEmail = (otp, fullname) => {
       </div>
 
       <p>This OTP expires in <strong>20 minutes</strong>. Do not share it with anyone.</p>
-      <p>Thanks,<br/>KLaundryAid</p>
+      <p>Thanks,<br/>LaundryAid</p>
 
       <hr style="margin-top: 30px;"/>
       <p style="font-size: 12px; color: #777; text-align: center;">If you didn't request this code, you can safely ignore this email.</p>
@@ -158,6 +181,68 @@ export const generateDailyDigestEmail = ({ date, transactions }) => {
         <tbody>${rows || '<tr><td colspan="5" style="padding:8px;text-align:center;">No transactions today</td></tr>'}</tbody>
       </table>
       <p style="margin-top:20px;color:#777;font-size:12px;">Generated automatically by LaundryAid</p>
+    </div>
+  `;
+};
+
+export const generateAdminWithdrawalEmail = ({
+  customerName,
+  email,
+  amount,
+  bankName,
+  accountName,
+  accountNumber,
+  withdrawalId
+}) => {
+  const BASE_URL = process.env.BACKEND_URL || "http://localhost:8999";
+
+  const makeBtn = (label, action, color) =>
+    `<a href="${BASE_URL}/api/user/wallet/admin/withdrawals/${withdrawalId}/${action}"
+      style="display:inline-block;margin:4px;padding:12px 20px;background:${color};color:#fff;
+             text-decoration:none;border-radius:6px;font-weight:bold;font-size:14px;">
+       ${label}
+    </a>`;
+
+  return `
+  <div style="font-family: Arial, sans-serif; padding: 20px; max-width: 600px;">
+    <img src="cid:laundryaidlogo" alt="LaundryAid Logo" style="width: 150px;" />
+    <h2 style="color:#127733;">New Withdrawal Request 💸</h2>
+    <p>A customer has requested to withdraw their referral earnings.</p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:20px;">
+      <tr><td style="padding:6px 0;"><strong>Customer Name:</strong></td><td>${customerName}</td></tr>
+      <tr><td style="padding:6px 0;"><strong>Customer Email:</strong></td><td>${email}</td></tr>
+      <tr><td style="padding:6px 0;"><strong>Amount:</strong></td><td><strong style="color:#c85f0b">₦${Number(amount).toLocaleString()}</strong></td></tr>
+      <tr><td style="padding:6px 0; border-top:1px solid #eee;"><strong>Bank Name:</strong></td><td style="border-top:1px solid #eee;">${bankName}</td></tr>
+      <tr><td style="padding:6px 0;"><strong>Account Name:</strong></td><td>${accountName}</td></tr>
+      <tr><td style="padding:6px 0;"><strong>Account Number:</strong></td><td>${accountNumber}</td></tr>
+    </table>
+
+    <hr style="border:none;border-top:1px solid #eee;margin:20px 0;"/>
+    <p style="font-weight:bold;margin-bottom:12px;">Approve or Reject this Transfer:</p>
+    <div>
+      ${makeBtn("✅ Confirm Paid", "confirm", "#127733")}
+      ${makeBtn("❌ Reject & Refund", "reject", "#ef4444")}
+    </div>
+    <p style="margin-top:16px;font-size:12px;color:#999;">Only confirm after you have successfully transferred the money.</p>
+  </div>
+`;
+};
+
+export const generateWithdrawalStatusEmail = ({ name, amount, status }) => {
+  const isApproved = status === 'completed';
+  const color = isApproved ? "#127733" : "#ef4444";
+  const title = isApproved ? "Withdrawal Successful 🎉" : "Withdrawal Rejected ❌";
+  const message = isApproved 
+    ? `Great news! Your withdrawal request for <strong>₦${Number(amount).toLocaleString()}</strong> has been processed and paid to your bank account.`
+    : `Unfortunately, your withdrawal request for <strong>₦${Number(amount).toLocaleString()}</strong> was rejected. The funds have been refunded to your LaundryAid wallet.`;
+
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 8px;">
+      <img src="cid:laundryaidlogo" alt="LaundryAid Logo" style="width: 150px;" />
+      <h2 style="color: ${color};">${title}</h2>
+      <p>Hi <strong>${name}</strong>,</p>
+      <p>${message}</p>
+      <p style="margin-top:24px;">Warm regards,<br/><strong>The LaundryAid Team</strong></p>
     </div>
   `;
 };

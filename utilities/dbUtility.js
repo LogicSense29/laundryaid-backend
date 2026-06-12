@@ -2,10 +2,11 @@ import { generateReferralCode } from "./generateRefcode.js";
 
 // helpers/dbUtils.js
 export async function findOrCreateCustomer(db, email, contact, referredByCode = null) {
+  const lowerEmail = email.toLowerCase();
   // Check if customer already exists
   const { rows: customers } = await db.query(
     "SELECT * FROM customers WHERE email = $1",
-    [email]
+    [lowerEmail]
   );
 
   if (customers.length > 0) {
@@ -38,7 +39,7 @@ export async function findOrCreateCustomer(db, email, contact, referredByCode = 
 
   const { rows: newCustomers } = await db.query(
     "INSERT INTO customers(email, mobile, referrer_id, referred_by) VALUES($1, $2, $3, $4) RETURNING user_id",
-    [email, contact, referrerCode, validReferredBy]
+    [lowerEmail, contact, referrerCode, validReferredBy]
   );
 
   if (newCustomers.length === 0) {

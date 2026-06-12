@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import db from "../model/db/db.js";
 import { findOrCreateCustomer } from "../utilities/dbUtility.js";
 import { generateAdminEmail, requestEmail, sendRequestMail } from "../utilities/mailer.js";
@@ -94,11 +95,23 @@ export const addRequest =  async (req, res ) => {
     );
 
     if (!paymentVerification.success) {
-      return res.status(400).json({ error: "Payment verification failed" });
+      return res.status(400).json({ error: "Payment verification failed" , message : paymentVerification.message});
     }
 
     // Credit referral commission (15%) to referrer if applicable
     await creditReferralCommission(user_id, paidAmount);
+
+    // [NEW] Insert Notification for Booking
+    await db.query(
+      `INSERT INTO notifications (user_id, title, message, type)
+       VALUES ($1, $2, $3, $4)`,
+      [
+        user_id,
+        "Booking Confirmed 🎉",
+        `Your ${packageType} laundry request was successfully booked! We'll pick it up on ${pickupDate}.`,
+        "booking"
+      ]
+    );
 
     const to = result.rows[0].email;
     const customerName = result.rows[0].name;
@@ -111,10 +124,21 @@ export const addRequest =  async (req, res ) => {
     const option = result.rows[0].pickup_option;
     // const clothes_count = result.rows[0].clothes_count
 
-    res.status(201).json({ request: result.rows[0] });
+    const token = jwt.sign({ id: user_id }, process.env.SECRET, { expiresIn: "2d" });
+    // Separate short-lived token for email status buttons (7 days)
+    const statusToken = jwt.sign({ request_id }, process.env.SECRET, { expiresIn: "7d" });
+    
+    const { rows: userRows } = await db.query("SELECT referrer_id FROM customers WHERE user_id = $1", [user_id]);
+    const referralCode = userRows.length > 0 ? userRows[0].referrer_id : null;
+
+    res.status(201).json({ 
+      request: result.rows[0], 
+      token, 
+      user: { email: customerEmail, referralCode }
+    });
     await sendRequestMail({
       to,
-      subject: "Your Laundry Request 😊",
+      subject: "Your Laundry Request",
       bcc: "palmslaundryng@gmail.com",
       html: requestEmail({
         to,
@@ -129,8 +153,8 @@ export const addRequest =  async (req, res ) => {
 
     await sendRequestMail({
       to: "palmslaundryng@gmail.com",
-      subject: "New Pickup Request 😊",
-      bcc: "info@laundryaid.com.ng",
+      subject: "New Pickup Request",
+      bcc: "lappiconnect@gmail.com",
       html: generateAdminEmail({
         email: customerEmail,
         customerName,
@@ -141,6 +165,8 @@ export const addRequest =  async (req, res ) => {
         mobile,
         clothesCount,
         pickupOption: option,
+        requestId: request_id,
+        statusToken,
       }),
     });
   } catch (err) {
