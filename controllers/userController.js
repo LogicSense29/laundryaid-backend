@@ -152,7 +152,7 @@ export const signInWithGoogle = async (req, res) => {
     );
 
     const jti = randomUUID();
-    const userId = rows[0].id;
+    const userId = rows[0].user_id;
     const token = await createToken(userId);
     const refreshToken = await createRefreshToken(userId, jti);
 
@@ -223,7 +223,7 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ error: "An error occured" });
     }
 
-    const userId = rows[0].id;
+    const userId = rows[0].user_id;
     //EmailVerification
     //Create token
     const emailToken = crypto.randomBytes(32).toString("hex");
@@ -295,7 +295,7 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ error: "Password Does not Match" });
     }
     const jti = randomUUID();
-    const userId = checkUserExist[0].id;
+    const userId = checkUserExist[0].user_id;
     const token = await createToken(userId);
     const refreshToken = await createRefreshToken(userId, jti);
     //Test Refresh Token
@@ -357,7 +357,7 @@ export const createPassword = async (req, res) => {
       return res.status(400).json({ error: "An error occured" });
     }
         const jti = randomUUID();
-        const userId = checkUserExist[0].id;
+        const userId = checkUserExist[0].user_id;
         const token = await createToken(userId);
         const refreshToken = await createRefreshToken(userId, jti);
         //Test Refresh Token

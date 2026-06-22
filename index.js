@@ -35,7 +35,8 @@ app.use('/api/admin', adminRoute)
 
 const keepAppAlive = () => {
   setInterval(() => {
-    https.get("https://laundryaid-backend.onrender.com");
+    // https.get("https://laundryaid-backend.onrender.com");
+    https.get("https://laundryaid-backend-production.up.railway.app");
     console.log("⏱️ App pinged to stay alive");
   }, 1000 * 60 * 5); // every 5 minutes
 };
